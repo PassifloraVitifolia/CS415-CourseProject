@@ -41,7 +41,7 @@ Istanbul, Turkey \\
 oyku.demirel@sabanciuniv.edu}
 \\[0.5cm]
 \IEEEauthorblockN{Bilge Kağan Yılmaz}
-\IEEEauthorblockA{\textit{bölüm} \\
+\IEEEauthorblockA{\textit{Computer Science and Engineering} \\
 \textit{Sabanci University}\\
 Istanbul, Turkey \\
 bilge.yilmaz@sabanciuniv.edu}
@@ -76,14 +76,18 @@ as one part of the entire proceedings, and not as an independent document.
 Please do not revise any of the current designations.
 
 \section{Datasets and related methods}
-Before you begin to format your paper, first write and save the content as a 
-separate text file. Complete all content and organizational editing before 
-formatting. Please note sections \ref{AA}--\ref{SCM} below for more information on 
-proofreading, spelling and grammar.
 
-Keep your text and graphic files separate until after the text has been 
-formatted and styled. Do not number text heads---{\LaTeX} will do that 
-for you.
+\subsection{Dataset}
+We use the multi-label version of the Aerial Image Dataset (AID). The imagery comes from AID \cite{xia2017aid}, a large-scale benchmark collected from Google Earth that covers different regions around the world under varying scales, orientations, and imaging conditions. This results in high intra-class variation and low inter-class dissimilarity, making the task closer to real-world scenarios than earlier benchmarks such as UC-Merced and WHU-RS19. Hua et al. \cite{hua2019relation} re-annotated 3,000 images from AID with 17 object-level labels (e.g., buildings, cars, trees, water), so that each image can be associated with multiple labels at once. Each image is $600 \times 600$ pixels in RGB. Since the publicly available version provides a single set of 3,000 images, we will split it into training, validation, and test sets with a 70/10/20 ratio.
+
+
+\section{Project Responsibilities}
+\begin{itemize}
+  \item Yağız Çetin: ...
+  \item Öykü Demirel: ...
+  \item Erkan Ulaş Tepe: ...
+  \item Bilge Kağan Yılmaz: ...
+\end{itemize}
 
 
 \subsection{Abbreviations and Acronyms}\label{AA}
@@ -270,16 +274,15 @@ For papers published in translation journals, please give the English
 citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
+\bibitem{xia2017aid} G.-S. Xia, J. Hu, F. Hu, B. Shi, X. Bai, Y. Zhong, L. Zhang, and X. Lu, ``AID: A benchmark data set for performance evaluation of aerial scene classification,'' \textit{IEEE Trans. Geosci. Remote Sens.}, vol. 55, no. 7, pp. 3965--3981, 2017.
+  
+\bibitem{hua2019relation} Y. Hua, L. Mou, and X. X. Zhu, ``Relation network for multi-label aerial image classification,'' \textit{IEEE Trans. Geosci. Remote Sens.}, vol. 58, no. 7, pp. 4558--4572, 2020.
+
 \bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
 \bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
 \bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
 \bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
 \bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
 \end{thebibliography}
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
 
 \end{document}
