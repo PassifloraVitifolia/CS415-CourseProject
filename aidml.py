@@ -115,7 +115,7 @@ class MultiLabelNet(nn.Module):
     B0: object head only.
     B1: object head + scene head (multi-task).
     B2: B1 + the scene prior added to the object logits.
-    Control runs use the architecture of B0 (B0_long) or B1 (B1_noextra, B1_shuffled), see run_experiment.
+    Control runs use the architecture of B0 (B0_long, B0_reg) or B1 (B1_noextra, B1_shuffled), see run_experiment.
     """
 
     def __init__(self, num_objects, num_scenes=0, prior_table=None, pretrained=True):
@@ -145,7 +145,7 @@ class MultiLabelNet(nn.Module):
 def build_model(model_name, data, pretrained=True):
     num_objects = len(data["object_names"])
     num_scenes = len(data["scene_names"])
-    if model_name in ["B0", "B0_long"]:
+    if model_name in ["B0", "B0_long", "B0_reg"]:
         return MultiLabelNet(num_objects, pretrained=pretrained)
     if model_name in ["B1", "B1_noextra", "B1_shuffled"]:
         return MultiLabelNet(num_objects, num_scenes, pretrained=pretrained)
@@ -201,7 +201,11 @@ def predict(model, data, idx, device, batch_size=64):
 
 
 def train_model(model, data, config, use_scene_loss, device):
-    """Train with BCE on object labels (+ cross-entropy on scene labels). Keeps the epoch with the best val mAP."""
+    """Train with BCE on object labels (+ cross-entropy on scene labels). Keeps the epoch with the best val mAP.
+
+    Optional regularization (off unless set in config): mixup with parameter config["mixup_alpha"] and label
+    smoothing config["label_smoothing"] for the object targets.
+    """
     train_idx = split_indices(data, "train")
     extra_idx = split_indices(data, "extra")
     val_idx = split_indices(data, "val")
@@ -218,6 +222,9 @@ def train_model(model, data, config, use_scene_loss, device):
     has_objects = torch.from_numpy(data["has_objects"])
     scenes = torch.from_numpy(data["scenes"])
 
+    mixup_alpha = config.get("mixup_alpha", 0)
+    smoothing = config.get("label_smoothing", 0)
+
     history, best_map, best_state = [], -1.0, None
     for epoch in range(1, config["epochs"] + 1):
         start_time = time.time()
@@ -230,15 +237,30 @@ def train_model(model, data, config, use_scene_loss, device):
         for start in range(0, len(epoch_idx), config["batch_size"]):
             idx = epoch_idx[start:start + config["batch_size"]]
             x = make_batch(data["images"], idx, device, augment=True)
-            object_logits, scene_logits = model(x)
-
+            targets = objects[idx].to(device)
             mask = has_objects[idx].to(device)
+            batch_scenes = scenes[idx].to(device)
+
+            # Mixup: blend every image with another image of the batch, and their labels with the same weight.
+            mix, order = 1.0, torch.arange(len(idx), device=device)
+            if mixup_alpha > 0:
+                mix = float(np.random.beta(mixup_alpha, mixup_alpha))
+                order = torch.randperm(len(idx)).to(device)
+                x = mix * x + (1 - mix) * x[order]
+                targets = mix * targets + (1 - mix) * targets[order]
+                mask = mask & mask[order]
+            # Label smoothing: targets 0 and 1 become eps / 2 and 1 - eps / 2.
+            targets = targets * (1 - smoothing) + smoothing / 2
+
+            object_logits, scene_logits = model(x)
             object_loss = torch.tensor(0.0, device=device)
             if mask.any():
-                object_loss = F.binary_cross_entropy_with_logits(object_logits[mask], objects[idx].to(device)[mask])
+                object_loss = F.binary_cross_entropy_with_logits(object_logits[mask], targets[mask])
             scene_loss = torch.tensor(0.0, device=device)
             if use_scene_loss:
-                scene_loss = F.cross_entropy(scene_logits, scenes[idx].to(device))
+                scene_loss = mix * F.cross_entropy(scene_logits, batch_scenes)
+                if mix < 1:
+                    scene_loss = scene_loss + (1 - mix) * F.cross_entropy(scene_logits, batch_scenes[order])
             loss = object_loss + config["scene_loss_weight"] * scene_loss
 
             optimizer.zero_grad()
@@ -282,11 +304,14 @@ def run_experiment(model_name, seed, data, config, device):
     train_data = reduce_labels(data, int(label_percent) / 100) if label_percent else data
 
     # Control runs. B0_long: B0 trained for twice as many epochs, so it sees as many images as B1.
+    # B0_reg: B0 with stronger regularization (mixup and label smoothing).
     # B1_noextra: no scene-only images, so B1 sees exactly the images of B0.
     # B1_shuffled: the scene labels of all training images are randomly permuted, so the scene head
     # gets the same amount of data and supervision as B1 but no real scene information.
     if model_name == "B0_long":
         config = {**config, "epochs": 2 * config["epochs"]}
+    if model_name == "B0_reg":
+        config = {**config, "mixup_alpha": 0.2, "label_smoothing": 0.1}
     if model_name == "B1_noextra":
         config = {**config, "extra_ratio": 0.0}
     if model_name == "B1_shuffled":

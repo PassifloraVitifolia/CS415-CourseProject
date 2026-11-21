@@ -17,9 +17,10 @@ scene labels help a model recognize objects. The project proposal is in [`docs/p
 
 Three control runs check where the gain of B1 comes from: **B1_noextra** (scene supervision on the multi-label
 training images only, i.e. the images of B0), **B1_shuffled** (same images as B1, randomly permuted scene
-labels) and **B0_long** (B0 trained for 40 epochs, so it sees as many images as B1).
+labels), **B0_long** (B0 trained for 40 epochs, so it sees as many images as B1) and **B0_reg** (B0 with mixup
+and label smoothing, to separate the effect of the scene labels from plain regularization).
 
-A pilot reduced-label experiment trains B0, B0_long, B1 and B2 with only 25% of the object labels
+A pilot reduced-label experiment trains B0, B0_long, B0_reg, B1 and B2 with only 25% of the object labels
 (`*_labels25` runs).
 
 ## Repository
@@ -27,8 +28,8 @@ A pilot reduced-label experiment trains B0, B0_long, B1 and B2 with only 25% of 
 ```
 01_data_preparation.ipynb   download, scene matching, split, cached images, dataset figures
 02_train_models.ipynb       trains B0, B1 and B2 for every seed
-03_control_experiments.ipynb trains the control runs B1_noextra, B1_shuffled and B0_long
-04_reduced_labels.ipynb     pilot: B0, B0_long, B1 and B2 with 25% of the object labels
+03_control_experiments.ipynb trains the control runs B1_noextra, B1_shuffled, B0_long and B0_reg
+04_reduced_labels.ipynb     pilot: B0, B0_long, B0_reg, B1 and B2 with 25% of the object labels
 05_results.ipynb            tables, significance tests and figures for the report
 aidml.py                    shared code: data loading, model, training, metrics
 environment.yml             conda environment
