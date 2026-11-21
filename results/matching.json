@@ -1,0 +1,13 @@
+{
+  "multilabel_images": 3000,
+  "distinct_matches": 3000,
+  "largest_match_distance": 0.09110862016677856,
+  "smallest_second_best_distance": 0.386422723531723,
+  "closest_other_image_to_a_test_image": 0.43018436431884766,
+  "mean_pixel_difference": 1.01565682888031,
+  "largest_pixel_difference": 2.174412727355957,
+  "images_per_scene": [
+    100,
+    100
+  ]
+}
